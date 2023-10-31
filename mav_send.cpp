@@ -1,11 +1,10 @@
 #include<iostream>
-#include "mavlink/v2.0/common/mavlink.h"
-#include "mavlink/v2.0/mavlink_types.h"
+#include "include/mavlink/v2.0/common/mavlink.h"
+#include "include/mavlink/v2.0/mavlink_types.h"
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include "include/mathlib/mathlib.h"
 #include "include/matrix/math.hpp"
 
 
@@ -13,35 +12,6 @@
 #pragma comment(lib,"ws2_32.lib")
 
 using namespace std;
-
-
-//发送和接受的具体处理函数
-void handle_gloabal_position_int(mavlink_message_t *msg) {
-    using std::cout; using std::endl;
-    mavlink_global_position_int_t global_pos;
-    mavlink_msg_global_position_int_decode(msg, &global_pos);
-    cout<<"global position print start:\n";
-    cout<<"latitude: "<<float(global_pos.lat)*1e-7<<" deg"<<endl;
-    cout<<"longitude: "<<float(global_pos.lon)*1e-7<<" deg"<<endl;
-    cout<<"height: "<<float(global_pos.alt) * 0.001f<<" m"<<endl;
-    cout<<"-------------------------\n"<<endl;
-    cout<<"velocity print start (NED):\n";
-    cout<<"north: "<<float(global_pos.vx)*0.01f<<"m/s"<<endl;
-    cout<<"east: "<<float(global_pos.vy)*0.01f<<"m/s"<<endl;
-    cout<<"down: "<<float(global_pos.vz)*0.01f<<"m/s"<<endl;
-    cout<<"----------------------------\n"<<endl;
-}
-
-void handle_attitude(mavlink_message_t *msg){
-    using std::cout; using std::endl;
-    mavlink_attitude_t atti;
-    mavlink_msg_attitude_decode(msg, &atti);
-    cout<<"attitude print start:\n";
-    cout<<"roll angle: "<< atti.roll<<" rad\n";
-    cout<<"yaw angle: "<< atti.yaw<<" rad\n";
-    cout<<"pitch angle: "<< atti.pitch<<" rad\n";
-    cout<<"----------------------------\n"<<endl;
-}
 
 // UDP发送函数
 void sendThreadFunction(int sockfd, char *ipAddr, int port) {
@@ -86,13 +56,13 @@ void sendThreadFunction(int sockfd, char *ipAddr, int port) {
         uint8_t buffer0[len0];
         mavlink_msg_to_send_buffer(buffer0, &msg_t);
         int t0 = sendto(sockfd, &buffer0, len0, 0, (sockaddr*)&serverAddr, sizeof(serverAddr));
-        cout <<"postion of target setted, sendto_len:  "<<t0 << endl<< endl;//若发送失败。则返回-1
+        cout <<"position of target has been set, sendto_len:  "<<t0 << endl<< endl;//若发送失败。则返回-1
 
         int len1 = mavlink_msg_set_attitude_target_encode(0, 0, &msg_t, &t_atti);
         uint8_t buffer1[len1];
         mavlink_msg_to_send_buffer(buffer1, &msg_t);
         int t1 = sendto(sockfd, &buffer1, len1, 0, (sockaddr*)&serverAddr, sizeof(serverAddr));
-        cout <<"attitude of target setted, sendto_len:  "<<t1 << endl<< endl;//若发送失败。则返回-1
+        cout <<"attitude of target has been set, sendto_len:  "<<t1 << endl<< endl;//若发送失败。则返回-1
 
 
 
@@ -102,7 +72,6 @@ void sendThreadFunction(int sockfd, char *ipAddr, int port) {
 
 
 int main() {
-    int receivePort = 26540;
     int sendPort = 24580;
     char* ipAddr = "127.0.0.1"; // 目标IP地址
 
