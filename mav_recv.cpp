@@ -42,16 +42,7 @@ void handle_attitude(mavlink_message_t *msg){
 }
 
 
-void receiveThreadFunc(int sockfd, char* ipAddr, int port) {
-    //初始化socket信息
-    struct sockaddr_in Server;
-    //设置服务器地址addrSrv和监听端口
-    Server.sin_family = AF_INET;
-    Server.sin_addr.s_addr = inet_addr(ipAddr); //设置服务器主机ip地址（与接收方客户端的IP对应）
-    Server.sin_port = htons(port);
-    //使用bind（）函数绑定监听端口，将socket文件描述符sockSrv与地址类型变量（struct sockaddr_in ）进行绑定
-    bind(sockfd, (sockaddr *)&Server, sizeof(sockaddr));
-
+void receiveThreadFunc(int sockfd, sockaddr_in & Server){
     char recvbuf[1000];
     while(1)
     {
@@ -101,16 +92,16 @@ int main() {
     int receivePort = 26540;
     char* ip_addr = "127.0.0.1"; // 目标IP地址
 
-    int sockfd;
+    //绑定UDP socket 地址，绑定的是本机的地址和端口，用于接收数据
     struct sockaddr_in server_addr;
+    // 设置服务器地址和端口
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(receivePort);
+    server_addr.sin_addr.s_addr = inet_addr(ip_addr);
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    bind(sockfd, (sockaddr *)&server_addr, sizeof(sockaddr));
 
-    // 创建UDP套接字
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-
-    // 绑定套接字到服务器地址
-    bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
-
-    receiveThreadFunc(sockfd, ip_addr, receivePort);
+    receiveThreadFunc(sockfd, server_addr);
 
     return 0;
 }

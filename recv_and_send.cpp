@@ -45,24 +45,16 @@ void handle_attitude(mavlink_message_t *msg){
     cout<<"----------------------------\n"<<endl;
 }
 
-void receiveThreadFunc(int sockfd, char* ipAddr, int port) {
-    //初始化socket信息
-    struct sockaddr_in Server;
-
-    //设置服务器地址addrSrv和监听端口
-    Server.sin_family = AF_INET;
-    Server.sin_addr.s_addr = inet_addr(ipAddr); //设置服务器主机ip地址（与接收方客户端的IP对应）
-    Server.sin_port = htons(port);
-
+void receiveThreadFunc(int sockfd, const sockaddr_in &server_addr) {
     char recvbuf[1000];
     while(1)
     {
         socklen_t len = sizeof(sockaddr);
         int  recv_len;
-        int flag =1;
+        bool flag = true;
         while(flag){
-            recv_len = recvfrom(sockfd, &recvbuf, sizeof(recvbuf), 0, (sockaddr *)&Server, &len);
-            if(recv_len){cout<<"received ！！！\n"; flag =0;}
+            recv_len = recvfrom(sockfd, &recvbuf, sizeof(recvbuf), 0, (sockaddr *)&server_addr, &len);
+            if(recv_len > 0){cout<<"received ！！！\n"; flag = false;}
             else{usleep(1000);}
         }
 
@@ -93,18 +85,18 @@ void receiveThreadFunc(int sockfd, char* ipAddr, int port) {
                 }
             }
         }
+        usleep(100000);
     }
 }
 
 // UDP发送函数
-void sendThreadFunction(int sockfd, char *ipAddr, int port) {
+void sendThreadFunction(int sockfd, char* ipAddr, int port){
 
-    struct sockaddr_in serverAddr;
-
+    struct sockaddr_in server_addr;
     // 设置服务器地址和端口
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(port);
-    serverAddr.sin_addr.s_addr = inet_addr(ipAddr);
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+    server_addr.sin_addr.s_addr = inet_addr(ipAddr);
 
     //发送位置设置
     mavlink_set_position_target_local_ned_t t_pos{};
@@ -138,17 +130,14 @@ void sendThreadFunction(int sockfd, char *ipAddr, int port) {
         int len0 = mavlink_msg_set_position_target_local_ned_encode(0, 0, &msg_t, &t_pos);
         uint8_t buffer0[len0];
         mavlink_msg_to_send_buffer(buffer0, &msg_t);
-        int t0 = sendto(sockfd, &buffer0, len0, 0, (sockaddr*)&serverAddr, sizeof(serverAddr));
+        int t0 = sendto(sockfd, &buffer0, len0, 0, (sockaddr*)&server_addr, sizeof(server_addr));
         cout <<"position of target is set, sendto_len:  "<<t0 << endl<< endl;//若发送失败。则返回-1
 
         int len1 = mavlink_msg_set_attitude_target_encode(0, 0, &msg_t, &t_atti);
         uint8_t buffer1[len1];
         mavlink_msg_to_send_buffer(buffer1, &msg_t);
-        int t1 = sendto(sockfd, &buffer1, len1, 0, (sockaddr*)&serverAddr, sizeof(serverAddr));
+        int t1 = sendto(sockfd, &buffer1, len1, 0, (sockaddr*)&server_addr, sizeof(server_addr));
         cout <<"attitude of target is set, sendto_len:  "<<t1 << endl<< endl;//若发送失败。则返回-1
-
-
-
     }
 
 }
@@ -159,17 +148,17 @@ int main() {
     int sendPort = 24580;
     char* ip_addr = "127.0.0.1"; // 目标IP地址
 
-    int sockfd;
+    //绑定UDP socket 地址，绑定的是本机的地址和端口，用于接收数据
     struct sockaddr_in server_addr;
-
-    // 创建UDP套接字
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-
-    // 绑定套接字到服务器地址
-    bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    // 设置服务器地址和端口
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(receivePort);
+    server_addr.sin_addr.s_addr = inet_addr(ip_addr);
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    bind(sockfd, (sockaddr *)&server_addr, sizeof(sockaddr));
 
     // 创建接收线程
-    std::thread receiveThread(receiveThreadFunc, sockfd, ip_addr, receivePort); //TODO 231031 harold:  UDP接受会阻塞, 查询如何解决
+    std::thread receiveThread(receiveThreadFunc, sockfd, server_addr); //TODO 231031 harold:  UDP接受会阻塞, 查询如何解决
     std::thread sendThread(sendThreadFunction, sockfd, ip_addr, sendPort);
 
     // 等待接收线程结束
