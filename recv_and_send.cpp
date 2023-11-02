@@ -45,6 +45,17 @@ void handle_attitude(mavlink_message_t *msg){
     cout<<"----------------------------\n"<<endl;
 }
 
+void handle_local_position_ned_cov(mavlink_message_t *msg){
+    using std::cout; using std::endl;
+    mavlink_local_position_ned_cov_t local_pos;
+    mavlink_msg_local_position_ned_cov_decode(msg, &local_pos);
+    cout<<"acceleration print start(NED):\n";
+    cout<<"ax: "<< local_pos.ax<<" m/s/s\n";
+    cout<<"ay: "<< local_pos.ay<<" m/s/s\n";
+    cout<<"az: "<< local_pos.az<<" m/s/s\n";
+    cout<<"----------------------------\n"<<endl;
+}
+
 void receiveThreadFunc(int sockfd, const sockaddr_in &server_addr) {
     char recvbuf[1000];
     while(1)
@@ -77,6 +88,11 @@ void receiveThreadFunc(int sockfd, const sockaddr_in &server_addr) {
                     case MAVLINK_MSG_ID_ATTITUDE:
                         handle_attitude(&msg);
                         cout<<"received attitude"<<endl;
+                        break;
+
+                    case MAVLINK_MSG_ID_LOCAL_POSITION_NED_COV:
+                        handle_local_position_ned_cov(&msg);
+                        cout<<"received local position!!"<<endl;
                         break;
 
                     case MAVLINK_MSG_ID_HEARTBEAT:

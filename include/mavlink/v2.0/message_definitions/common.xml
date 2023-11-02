@@ -6859,6 +6859,16 @@
       <field type="uint16_t" name="sequence_oldest_available">Oldest Sequence number that is still available after the sequence set in REQUEST_EVENT.</field>
       <field type="uint8_t" name="reason" enum="MAV_EVENT_ERROR_REASON">Error reason.</field>
     </message>
+
+    <message id="414" name="FLOW_ANGEL">
+      <wip/>
+      <!-- This message contains angel of attack, angle of sideslip, for test. unimportant -->
+      <description>  This message contains angel of attack, angle of sideslip, for test. unimportant  </description>
+      <field type="uint64_t" name="timestamp" units="us">Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude of the number.</field>
+      <field type="int32_t" name="angle_attack" units="degE7"> angle of attack</field>
+      <field type="int32_t" name="angle_sideslip" units="degE7"> angle of sideslip</field>
+    </message>
+
     <!-- Rover specific messages -->
     <message id="9000" name="WHEEL_DISTANCE">
       <description>Cumulative distance traveled for each reported wheel.</description>
