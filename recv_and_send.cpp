@@ -56,6 +56,16 @@ void handle_local_position_ned_cov(mavlink_message_t *msg){
     cout<<"----------------------------\n"<<endl;
 }
 
+void handle_flow_angle(mavlink_message_t *msg){
+    using std::cout; using std::endl;
+    mavlink_flow_angle_t flow_angle;
+    mavlink_msg_flow_angle_decode(msg, &flow_angle);
+    cout<<"flow angle print start(NED):\n";
+    cout<<"angle of attack: "<< float(flow_angle.angle_attack)*1e-7<<" deg. \n";
+    cout<<"angle of slip: "<< float(flow_angle.angle_sideslip)*1e-7<<" deg. \n";
+    cout<<"----------------------------\n"<<endl;
+}
+
 void receiveThreadFunc(int sockfd, const sockaddr_in &server_addr) {
     char recvbuf[1000];
     while(1)
@@ -95,13 +105,18 @@ void receiveThreadFunc(int sockfd, const sockaddr_in &server_addr) {
                         cout<<"received local position!!"<<endl;
                         break;
 
-                    case MAVLINK_MSG_ID_HEARTBEAT:
-                        cout<<"received heart beat!!"<<endl;
+                    case MAVLINK_MSG_ID_FLOW_ANGLE:
+                        handle_flow_angle(&msg);
+                        cout<<"received flow angle!!"<<endl;
                         break;
+
+//                    case MAVLINK_MSG_ID_HEARTBEAT:
+//                        cout<<"received heart beat!!"<<endl;
+//                        break;
                 }
             }
         }
-        usleep(100000);
+        usleep(10000);
     }
 }
 

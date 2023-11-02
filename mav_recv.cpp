@@ -41,17 +41,38 @@ void handle_attitude(mavlink_message_t *msg){
     cout<<"----------------------------\n"<<endl;
 }
 
+void handle_local_position_ned_cov(mavlink_message_t *msg){
+    using std::cout; using std::endl;
+    mavlink_local_position_ned_cov_t local_pos;
+    mavlink_msg_local_position_ned_cov_decode(msg, &local_pos);
+    cout<<"acceleration print start(NED):\n";
+    cout<<"ax: "<< local_pos.ax<<" m/s/s\n";
+    cout<<"ay: "<< local_pos.ay<<" m/s/s\n";
+    cout<<"az: "<< local_pos.az<<" m/s/s\n";
+    cout<<"----------------------------\n"<<endl;
+}
 
-void receiveThreadFunc(int sockfd, sockaddr_in & Server){
+void handle_flow_angle(mavlink_message_t *msg){
+    using std::cout; using std::endl;
+    mavlink_flow_angle_t flow_angle;
+    mavlink_msg_flow_angle_decode(msg, &flow_angle);
+    cout<<"flow angle print start(NED):\n";
+    cout<<"angle of attack: "<< float(flow_angle.angle_attack)*1e-7<<" deg. \n";
+    cout<<"angle of slip: "<< float(flow_angle.angle_sideslip)*1e-7<<" deg. \n";
+    cout<<"----------------------------\n"<<endl;
+}
+
+
+void receiveThreadFunc(int sockfd, const sockaddr_in &server_addr) {
     char recvbuf[1000];
     while(1)
     {
         socklen_t len = sizeof(sockaddr);
         int  recv_len;
-        int flag =1;
+        bool flag = true;
         while(flag){
-            recv_len = recvfrom(sockfd, &recvbuf, sizeof(recvbuf), 0, (sockaddr *)&Server, &len);
-            if(recv_len){cout<<"received ！！！\n"; flag =0;}
+            recv_len = recvfrom(sockfd, &recvbuf, sizeof(recvbuf), 0, (sockaddr *)&server_addr, &len);
+            if(recv_len > 0){cout<<"received ！！！\n"; flag = false;}
             else{usleep(1000);}
         }
 
@@ -76,13 +97,20 @@ void receiveThreadFunc(int sockfd, sockaddr_in & Server){
                         cout<<"received attitude"<<endl;
                         break;
 
-                    case MAVLINK_MSG_ID_HEARTBEAT:
-                        cout<<"received heart beat!!"<<endl;
+                    case MAVLINK_MSG_ID_LOCAL_POSITION_NED_COV:
+                        handle_local_position_ned_cov(&msg);
+                        cout<<"received local position!!"<<endl;
+                        break;
+
+                    case MAVLINK_MSG_ID_FLOW_ANGLE:
+                        handle_flow_angle(&msg);
+                        cout<<"received flow angle!!"<<endl;
                         break;
 
                 }
             }
         }
+        usleep(10000);
     }
 }
 

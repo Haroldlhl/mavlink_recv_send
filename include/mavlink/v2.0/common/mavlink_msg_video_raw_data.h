@@ -101,8 +101,8 @@ typedef struct __mavlink_video_raw_data_t {
  * @param pitch_speed [degE4/s]  pitch rate
  * @param yaw_speed [degE4/s]  yaw rate
  * @param roll [degE4]  roll
- * @param pitch [degE4]  pitch
- * @param yaw [degE4]  yaw
+ * @param pitch [degE4]  pitch 
+ * @param yaw [degE4]  yaw 
  * @param v_e [0.01m/s] GPS velocity in east direction in earth-fixed ENU frame
  * @param v_n [0.01m/s] GPS velocity in north direction in earth-fixed ENU frame
  * @param v_u [0.01m/s] GPS velocity in up direction in earth-fixed ENU frame
@@ -180,8 +180,8 @@ static inline uint16_t mavlink_msg_video_raw_data_pack(uint8_t system_id, uint8_
  * @param pitch_speed [degE4/s]  pitch rate
  * @param yaw_speed [degE4/s]  yaw rate
  * @param roll [degE4]  roll
- * @param pitch [degE4]  pitch
- * @param yaw [degE4]  yaw
+ * @param pitch [degE4]  pitch 
+ * @param yaw [degE4]  yaw 
  * @param v_e [0.01m/s] GPS velocity in east direction in earth-fixed ENU frame
  * @param v_n [0.01m/s] GPS velocity in north direction in earth-fixed ENU frame
  * @param v_u [0.01m/s] GPS velocity in up direction in earth-fixed ENU frame
@@ -285,8 +285,8 @@ static inline uint16_t mavlink_msg_video_raw_data_encode_chan(uint8_t system_id,
  * @param pitch_speed [degE4/s]  pitch rate
  * @param yaw_speed [degE4/s]  yaw rate
  * @param roll [degE4]  roll
- * @param pitch [degE4]  pitch
- * @param yaw [degE4]  yaw
+ * @param pitch [degE4]  pitch 
+ * @param yaw [degE4]  yaw 
  * @param v_e [0.01m/s] GPS velocity in east direction in earth-fixed ENU frame
  * @param v_n [0.01m/s] GPS velocity in north direction in earth-fixed ENU frame
  * @param v_u [0.01m/s] GPS velocity in up direction in earth-fixed ENU frame
@@ -516,7 +516,7 @@ static inline int32_t mavlink_msg_video_raw_data_get_roll(const mavlink_message_
 /**
  * @brief Get field pitch from video_raw_data message
  *
- * @return [degE4]  pitch
+ * @return [degE4]  pitch 
  */
 static inline int32_t mavlink_msg_video_raw_data_get_pitch(const mavlink_message_t* msg)
 {
@@ -526,7 +526,7 @@ static inline int32_t mavlink_msg_video_raw_data_get_pitch(const mavlink_message
 /**
  * @brief Get field yaw from video_raw_data message
  *
- * @return [degE4]  yaw
+ * @return [degE4]  yaw 
  */
 static inline uint32_t mavlink_msg_video_raw_data_get_yaw(const mavlink_message_t* msg)
 {
